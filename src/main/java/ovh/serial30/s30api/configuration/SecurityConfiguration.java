@@ -40,7 +40,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.ignoringRequestMatchers(Const.Routes.AUTH + Const.Routes.ALL))
-            .cors((cors) -> cors.configurationSource(corsConfigurationSource()))
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(
                 requests -> requests
                     .requestMatchers(Const.Routes.PUBLIC + Const.Routes.ALL).permitAll()

@@ -12,11 +12,13 @@ public final class Const {
             String EXCEPTION_DETAIL = "s30-api exception thrown!\n\tType: {}\n\tStatus code: {}\n\tMessage: {}";
             String USER401 = "Wrong authentication credentials!";
             String USER404 = "User ({}) does not exist!";
+            String USER422 = "User ({}) already exists!";
             String ARGUMENT422 = "Argument ({}) value invalid! at ({})";
             String PROJECT404 = "Project ({}) not found!";
+            String PROJECT_INFO404 = "Project ({}) does not have info associated!";
             String ROLE404 = "Role ({}) not found!";
         }
-        interface Auth {
+        interface Authentication {
             String AUTH_SUCCESS = "Auth success for user ({})";
             String REGISTRATION_SUCCESS = "Registration success for user ({})";
         }
@@ -29,19 +31,23 @@ public final class Const {
             String TOKEN_GENERATED = "Token generation successful!";
             String TOKEN_INFO = "Token information: userId({}) - expiration({})";
         }
+        interface Projects {
+            String PROJECTS_LIST = "Successfully retrieved ({}) project previews!";
+            String PROJECT_INFO = "Successfully retrieved project ({}) information!";
+        }
     }
     public interface Routes {
         String ALL = "/**";
-        String EMPTY = "";
         /*---- SECURED ROUTES ----*/
         String USERS = "/users";
         /*---- PUBLIC ROUTES ----*/
-        String AUTH = "/auth";
+        String AUTH = "/authentication";
         String LOGIN = "/login";
         String REGISTER = "/register";
         String PUBLIC = "/public";
         String HOME = "/home";
         String PROJECTS = "/projects";
+        String PROJECTS_INFO = "/{id}";
     }
     public interface Entities {
         String USERS = "users";

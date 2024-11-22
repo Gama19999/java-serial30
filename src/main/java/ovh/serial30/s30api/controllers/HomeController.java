@@ -23,7 +23,6 @@ public class HomeController {
 
     @RequestMapping(
             method = RequestMethod.GET,
-            path = Const.Routes.EMPTY,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> status() {
         logger.info(Const.Logs.active, appName, appVersion);

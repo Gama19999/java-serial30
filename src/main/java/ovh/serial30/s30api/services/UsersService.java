@@ -1,32 +1,30 @@
 package ovh.serial30.s30api.services;
 
 import ovh.serial30.s30api.entities.UserEntity;
-import ovh.serial30.s30api.exceptions.ProjectNotFoundEx;
-import ovh.serial30.s30api.exceptions.RoleNotFoundEx;
-import ovh.serial30.s30api.exceptions.UserNotFoundEx;
-import ovh.serial30.s30api.exceptions.UserWrongCredentialsEx;
-import ovh.serial30.s30api.pojos.request.UserUpdate;
+import ovh.serial30.s30api.exceptions.*;
+import ovh.serial30.s30api.pojos.request.UserUpdateRequest;
 
 import java.util.UUID;
 
 public interface UsersService {
     /**
      * Saves user's data to server database
-     * @param entity UserEntity object
+     * @param userEnt UserEntity object
      * @return User's generated ID
+     * @throws UserAlreadyExistsEx If the user to register is a duplicate server stored username
      */
-    UUID registerUser(UserEntity entity);
+    UUID registerUser(UserEntity userEnt) throws UserAlreadyExistsEx;
 
     /**
      * Updates user's data. <b>[Secured method]</b>
-     * @param request User update data representation
+     * @param update User update data representation
      * @return User's generated ID
      * @throws UserNotFoundEx If user does not exist
      * @throws UserWrongCredentialsEx If user credentials do not match the ones in server database
      * @throws RoleNotFoundEx If role name does not exist
      * @throws ProjectNotFoundEx If project does not exist
      */
-    String updateUserData(UserUpdate request) throws UserNotFoundEx, UserWrongCredentialsEx, RoleNotFoundEx, ProjectNotFoundEx;
+    String updateUserData(UserUpdateRequest update) throws UserNotFoundEx, UserWrongCredentialsEx, RoleNotFoundEx, ProjectNotFoundEx;
 
     /**
      * Gets User's ID from given username

@@ -13,5 +13,5 @@ import java.util.UUID;
 @Repository
 public interface RolesRepository extends CrudRepository<RoleEntity, UUID> {
     @Query("from roles r where r.name = :name")
-    Optional<RoleEntity> findByName(@Param(Const.Entities.Attributes.NAME) String name);
+    Optional<RoleEntity> findByName(@Param(Const.Entities.Attributes.NAME) String str);
 }

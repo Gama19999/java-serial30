@@ -8,11 +8,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ovh.serial30.s30api.entities.UserEntity;
-import ovh.serial30.s30api.exceptions.ProjectNotFoundEx;
-import ovh.serial30.s30api.exceptions.RoleNotFoundEx;
-import ovh.serial30.s30api.exceptions.UserNotFoundEx;
-import ovh.serial30.s30api.exceptions.UserWrongCredentialsEx;
-import ovh.serial30.s30api.pojos.request.UserUpdate;
+import ovh.serial30.s30api.exceptions.*;
+import ovh.serial30.s30api.pojos.request.UserUpdateRequest;
 import ovh.serial30.s30api.repositories.ProjectsRepository;
 import ovh.serial30.s30api.repositories.RolesRepository;
 import ovh.serial30.s30api.repositories.UsersRepository;
@@ -40,28 +37,27 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     @Transactional
-    public UUID registerUser(UserEntity entity) {
-        usersRepository.save(entity);
-        logger.info(Const.Logs.Users.REGISTERED, entity.getId());
-        return entity.getId();
+    public UUID registerUser(UserEntity userEnt) throws UserAlreadyExistsEx {
+        if (utilityService.userExists(userEnt.getUsername())) throw new UserAlreadyExistsEx(userEnt.getUsername());
+        usersRepository.save(userEnt);
+        logger.info(Const.Logs.Users.REGISTERED, userEnt.getId());
+        return userEnt.getId();
     }
 
     @Override
     @Transactional
-    public String updateUserData(UserUpdate request) throws UserNotFoundEx, UserWrongCredentialsEx, RoleNotFoundEx, ProjectNotFoundEx {
+    public String updateUserData(UserUpdateRequest update) throws UserNotFoundEx, UserWrongCredentialsEx, RoleNotFoundEx, ProjectNotFoundEx {
         var userId = utilityService.getRequestUserId();
-        var userOpt = usersRepository.findById(Util.touuid(userId));
-        if (userOpt.isEmpty()) throw new UserNotFoundEx(userId);
-        var userEnt = userOpt.get();
-        if (invalidCurrentPassword(request, userEnt)) throw new UserWrongCredentialsEx();
-        switch (request.getUpdateField()) {
-            case 1 -> userEnt.setUsername(request.getNewValue());
-            case 2 -> userEnt.setPassword(passwordEncoder.encode(request.getNewValue()));
-            case 3 -> userEnt.setRoleId(rolesRepository.findByName(request.getNewValue())
-                        .orElseThrow(() -> new RoleNotFoundEx(request.getNewValue()))
+        var userEnt = usersRepository.findById(Util.touuid(userId)).orElseThrow(() -> new UserNotFoundEx(userId));
+        if (invalidCurrentPassword(update, userEnt)) throw new UserWrongCredentialsEx();
+        switch (update.getUpdateField()) {
+            case 1 -> userEnt.setUsername(update.getNewValue());
+            case 2 -> userEnt.setPassword(passwordEncoder.encode(update.getNewValue()));
+            case 3 -> userEnt.setRoleId(rolesRepository.findByName(update.getNewValue())
+                        .orElseThrow(() -> new RoleNotFoundEx(update.getNewValue()))
                         .getId());
-            case 4 -> userEnt.setProjectId(projectsRepository.findById(Util.touuid(request.getNewValue()))
-                        .orElseThrow(() -> new ProjectNotFoundEx(request.getNewValue()))
+            case 4 -> userEnt.setProjectId(projectsRepository.findById(Util.touuid(update.getNewValue()))
+                        .orElseThrow(() -> new ProjectNotFoundEx(update.getNewValue()))
                         .getId());
         }
         usersRepository.save(userEnt);
@@ -75,7 +71,7 @@ public class UsersServiceImpl implements UsersService {
      * @param request User update data representation
      * @return {@code true} if current password sent in request is invalid. {@code false} otherwise.
      */
-    private boolean invalidCurrentPassword(UserUpdate request, UserEntity userEnt) {
+    private boolean invalidCurrentPassword(UserUpdateRequest request, UserEntity userEnt) {
         return !passwordEncoder.matches(request.getCurrentPassword(), userEnt.getPassword());
     }
 

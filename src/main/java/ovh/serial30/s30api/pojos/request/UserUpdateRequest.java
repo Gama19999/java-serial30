@@ -9,7 +9,7 @@ import ovh.serial30.s30api.utilities.Util;
  * User update data representation
  */
 @Getter @Setter
-public class UserUpdate {
+public class UserUpdateRequest {
     private String currentPassword;
     private int updateField;
     private String newValue;
@@ -28,11 +28,11 @@ public class UserUpdate {
      * @param newValue New value to save to specified field
      * @throws ArgumentInvalidEx If some argument value is invalid
      */
-    public UserUpdate(String currentPassword, int updateField, String newValue) throws ArgumentInvalidEx {
-        if (Util.invalidStr(currentPassword)) throw new ArgumentInvalidEx("currentPassword", UserUpdate.class.getName(), "constructor");
-        if (updateField < 1 || updateField > 4) throw new ArgumentInvalidEx("updateField", UserUpdate.class.getName(), "constructor");
-        if (Util.invalidStr(newValue)) throw new ArgumentInvalidEx("newValue", UserUpdate.class.getName(), "constructor");
-        if (updateField == 3 && Util.invalidRole(newValue)) throw new ArgumentInvalidEx("newValue", UserUpdate.class.getName(), "constructor");
+    public UserUpdateRequest(String currentPassword, int updateField, String newValue) throws ArgumentInvalidEx {
+        if (Util.invalidStr(currentPassword)) throw new ArgumentInvalidEx("currentPassword", UserUpdateRequest.class.getName(), "constructor");
+        if (updateField < 1 || updateField > 4) throw new ArgumentInvalidEx("updateField", UserUpdateRequest.class.getName(), "constructor");
+        if (Util.invalidStr(newValue)) throw new ArgumentInvalidEx("newValue", UserUpdateRequest.class.getName(), "constructor");
+        if (updateField == 3 && Util.invalidRole(newValue)) throw new ArgumentInvalidEx("newValue", UserUpdateRequest.class.getName(), "constructor");
         this.currentPassword = currentPassword;
         this.updateField = updateField;
         this.newValue = newValue;

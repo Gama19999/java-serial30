@@ -10,9 +10,10 @@ import org.springframework.stereotype.Service;
 import ovh.serial30.s30api.entities.UserEntity;
 import ovh.serial30.s30api.exceptions.ProjectNotFoundEx;
 import ovh.serial30.s30api.exceptions.RoleNotFoundEx;
+import ovh.serial30.s30api.exceptions.UserAlreadyExistsEx;
 import ovh.serial30.s30api.exceptions.UserNotFoundEx;
-import ovh.serial30.s30api.pojos.request.UserLogin;
-import ovh.serial30.s30api.pojos.request.UserRegistration;
+import ovh.serial30.s30api.pojos.request.UserLoginRequest;
+import ovh.serial30.s30api.pojos.request.UserSignupRequest;
 import ovh.serial30.s30api.repositories.ProjectsRepository;
 import ovh.serial30.s30api.repositories.RolesRepository;
 import ovh.serial30.s30api.utilities.Const;
@@ -21,8 +22,8 @@ import ovh.serial30.s30api.utilities.Util;
 import java.util.UUID;
 
 @Service
-public class AuthServiceImpl implements AuthService {
-    private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
+public class AuthenticationServiceImpl implements AuthenticationService {
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -38,31 +39,31 @@ public class AuthServiceImpl implements AuthService {
     private RolesRepository rolesRepository;
 
     @Override
-    public UUID login(UserLogin login) throws UserNotFoundEx {
+    public UUID login(UserLoginRequest login) throws UserNotFoundEx {
         if (!utilityService.userExists(login.getUsername())) throw new UserNotFoundEx(login.getUsername());
         var upat = new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword());
         var auth = authenticationManager.authenticate(upat);
         UUID userId = null;
         if (auth.isAuthenticated()) {
-            logger.info(Const.Logs.Auth.AUTH_SUCCESS, login.getUsername());
+            logger.info(Const.Logs.Authentication.AUTH_SUCCESS, login.getUsername());
             userId = usersService.getIdByUsername(login.getUsername());
         }
         return userId;
     }
 
     @Override
-    public UUID register(UserRegistration registration) throws ProjectNotFoundEx, RoleNotFoundEx {
+    public UUID register(UserSignupRequest signup) throws ProjectNotFoundEx, RoleNotFoundEx, UserAlreadyExistsEx {
         var userEnt = new UserEntity();
-        userEnt.setUsername(registration.getUsername());
-        userEnt.setPassword(passwordEncoder.encode(registration.getPassword()));
-        userEnt.setRoleId(rolesRepository.findByName(registration.getRole())
-                .orElseThrow(() -> new RoleNotFoundEx(registration.getRole()))
+        userEnt.setUsername(signup.getUsername());
+        userEnt.setPassword(passwordEncoder.encode(signup.getPassword()));
+        userEnt.setRoleId(rolesRepository.findByName(signup.getRole())
+                .orElseThrow(() -> new RoleNotFoundEx(signup.getRole()))
                 .getId());
-        userEnt.setProjectId(projectsRepository.findById(Util.touuid(registration.getProjectId()))
-                .orElseThrow(() -> new ProjectNotFoundEx(registration.getProjectId()))
+        userEnt.setProjectId(projectsRepository.findById(Util.touuid(signup.getProjectId()))
+                .orElseThrow(() -> new ProjectNotFoundEx(signup.getProjectId()))
                 .getId());
         var userId = usersService.registerUser(userEnt);
-        logger.info(Const.Logs.Auth.REGISTRATION_SUCCESS, userId);
+        logger.info(Const.Logs.Authentication.REGISTRATION_SUCCESS, userId);
         return userId;
     }
 }
