@@ -17,6 +17,8 @@ public final class Const {
             String PROJECT404 = "Project ({}) not found!";
             String PROJECT_INFO404 = "Project ({}) does not have info associated!";
             String ROLE404 = "Role ({}) not found!";
+            String HEADER422 = "Header ({}) value invalid!";
+            String TOKEN403 = "Token invalid!";
         }
         interface Authentication {
             String AUTH_SUCCESS = "Auth success for user ({})";
@@ -30,6 +32,7 @@ public final class Const {
         interface Token {
             String TOKEN_GENERATED = "Token generation successful!";
             String TOKEN_INFO = "Token information: userId({}) - expiration({})";
+            String TOKEN_RENEW = "Token renew successful!";
         }
         interface Projects {
             String PROJECTS_LIST = "Successfully retrieved ({}) project previews!";
@@ -39,6 +42,7 @@ public final class Const {
     public interface Routes {
         String ALL = "/**";
         /*---- SECURED ROUTES ----*/
+        String RENEW = "/renew";
         String USERS = "/users";
         /*---- PUBLIC ROUTES ----*/
         String AUTH = "/authentication";
@@ -55,6 +59,7 @@ public final class Const {
         String PROJECTS_INFO = "projects_info";
         String ROLES = "roles";
         interface Attributes {
+            String ID = "id";
             String USER_ID = "user_id";
             String USERNAME = "username";
             String PASSWORD = "password";

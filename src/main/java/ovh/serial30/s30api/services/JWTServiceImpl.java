@@ -9,11 +9,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ovh.serial30.s30api.exceptions.TokenInvalidEx;
 import ovh.serial30.s30api.exceptions.UserNotFoundEx;
 import ovh.serial30.s30api.utilities.Const;
 import ovh.serial30.s30api.utilities.Util;
 
 import javax.crypto.SecretKey;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 import java.util.function.Function;
@@ -37,7 +39,7 @@ public class JWTServiceImpl implements JWTService {
         if (!utilityService.userExists(userId)) throw new UserNotFoundEx(Util.tostr(userId));
         var token = buildToken(userId);
         logger.info(Const.Logs.Token.TOKEN_GENERATED);
-        logger.info(Const.Logs.Token.TOKEN_INFO, Util.tostr(userId), getClaim(token, Claims::getExpiration).toString());
+        logger.info(Const.Logs.Token.TOKEN_INFO, Util.tostr(userId), new Date(System.currentTimeMillis() + expirationTime));
         return token;
     }
 
@@ -66,25 +68,47 @@ public class JWTServiceImpl implements JWTService {
      * @param token User token
      * @param claimResolver Claim to retrieve
      * @return Claim object
+     * @throws TokenInvalidEx If token is an invalid string
      */
-    private Object getClaim(String token, Function<Claims, Object> claimResolver) {
+    private Object getClaim(String token, Function<Claims, Object> claimResolver) throws TokenInvalidEx {
+        if (Util.invalidStr(token)) throw new TokenInvalidEx();
         var payload = Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
         return claimResolver.apply(payload);
     }
 
     @Override
-    public boolean isValidToken(String token) {
-        return String.valueOf(getClaim(token, Claims::getIssuer)).equals(appName) &&
-               utilityService.userExists(Util.touuid(getClaim(token, Claims::getSubject).toString())) &&
-               isTokenNonExpired(token);
+    public boolean validateToken(String token) throws TokenInvalidEx, UserNotFoundEx {
+        if (!utilityService.userExists(Util.touuid(getClaim(token, Claims::getSubject).toString())))
+            throw new UserNotFoundEx(getClaim(token, Claims::getSubject).toString());
+        return String.valueOf(getClaim(token, Claims::getIssuer)).equals(appName) && nonExpired(token);
     }
 
     /**
      * Checks whether token is expired
      * @param token User token
-     * @return {@code true} if token is expired. {@code false} otherwise.
+     * @return {@code true} if token is expired. {@code false} otherwise
+     * @throws TokenInvalidEx If token is invalid
      */
-    private boolean isTokenNonExpired(String token) {
-        return ((Date) getClaim(token, Claims::getExpiration)).before(new Date());
+    private boolean nonExpired(String token) throws TokenInvalidEx {
+        return !Util.beforeThan(getClaim(token, Claims::getExpiration), new Date());
+    }
+
+    @Override
+    public String renewToken(String token) throws UserNotFoundEx, TokenInvalidEx {
+        if (olderThanOneMonth(token)) throw new TokenInvalidEx();
+        var userId = Util.touuid(getClaim(token, Claims::getSubject).toString());
+        return generateToken(userId);
+    }
+
+    /**
+     * Verifies token renewal is not older than one month
+     * @param token Expired user's token
+     * @return {@code true} if token is 1+ month older - {@code false} otherwise
+     * @throws TokenInvalidEx If token is invalid
+     */
+    private boolean olderThanOneMonth(String token) throws TokenInvalidEx {
+        var curCal = Calendar.getInstance();
+        curCal.roll(Calendar.MONTH, -1);
+        return Util.beforeThan(getClaim(token, Claims::getExpiration), curCal.getTime());
     }
 }

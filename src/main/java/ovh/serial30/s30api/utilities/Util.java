@@ -1,6 +1,7 @@
 package ovh.serial30.s30api.utilities;
 
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -50,5 +51,15 @@ public class Util {
      */
     public static boolean invalidRole(String role) {
         return !Const.ROLES.contains(role);
+    }
+
+    /**
+     * Checks whether <b>d1</b> is a date before <b>d2</b>
+     * @param d1 Date one
+     * @param d2 Date two
+     * @return {@code true} if d1 is before d2 - {@code false} otherwise
+     */
+    public static boolean beforeThan(Object d1, Object d2) {
+        return ((Date) d1).before((Date) d2);
     }
 }

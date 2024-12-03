@@ -1,18 +1,15 @@
 package ovh.serial30.s30api.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-import ovh.serial30.s30api.exceptions.ProjectNotFoundEx;
-import ovh.serial30.s30api.exceptions.RoleNotFoundEx;
-import ovh.serial30.s30api.exceptions.UserAlreadyExistsEx;
-import ovh.serial30.s30api.exceptions.UserNotFoundEx;
+import org.springframework.web.bind.annotation.*;
+import ovh.serial30.s30api.exceptions.*;
 import ovh.serial30.s30api.pojos.request.UserLoginRequest;
 import ovh.serial30.s30api.pojos.request.UserSignupRequest;
 import ovh.serial30.s30api.pojos.response.LoginResponse;
@@ -25,6 +22,8 @@ import ovh.serial30.s30api.utilities.Util;
 @RestController
 @RequestMapping(Const.Routes.AUTH)
 public class AuthenticationController {
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
+
     @Value("${security.jwt.expiration-time}")
     private long expirationTime;
 
@@ -55,5 +54,16 @@ public class AuthenticationController {
         var newUserId = Util.tostr(authenticationService.register(signup));
         var response = new MSResponse(HttpStatus.CREATED.value(), Const.Logs.Users.CREATED.replaceFirst(Const.Logs.$, newUserId));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @RequestMapping(
+            method = RequestMethod.GET,
+            path = Const.Routes.RENEW,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> renew(@RequestHeader(HttpHeaders.AUTHORIZATION) String token) throws UserNotFoundEx, TokenInvalidEx {
+        var userToken = jwtService.renewToken(token);
+        var response = new MSResponse(new LoginResponse(userToken, expirationTime));
+        logger.info(Const.Logs.Token.TOKEN_RENEW);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 }

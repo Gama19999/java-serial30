@@ -36,7 +36,7 @@ public class ProjectsController {
             method = RequestMethod.GET,
             path = Const.Routes.PROJECTS_INFO,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getProjectInfo(@PathVariable("id") String projectId) {
+    public ResponseEntity<?> getProjectInfo(@PathVariable(Const.Entities.Attributes.ID) String projectId) {
         logger.info(Const.Logs.Projects.PROJECT_INFO, projectId);
         var response = new MSResponse();
         return ResponseEntity.status(response.getStatus()).body(response);
