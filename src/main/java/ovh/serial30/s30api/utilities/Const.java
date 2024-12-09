@@ -1,10 +1,16 @@
 package ovh.serial30.s30api.utilities;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 public final class Const {
     private Const() {}
+    public interface Http {
+        String DEV = "http://localhost:4200";
+        String LOCAL = "http://127.0.0.1:[*]";
+        String PROD = "https://*.serial30.ovh";
+    }
     public interface Logs {
         String $ = "\\{\\}";
         String active = "{} v{} is active!";
@@ -19,19 +25,17 @@ public final class Const {
             String ROLE404 = "Role ({}) not found!";
             String HEADER422 = "Header ({}) value invalid!";
             String TOKEN403 = "Token invalid!";
+            String TOKEN401 = "Token not renewable! Login required!";
         }
         interface Authentication {
             String AUTH_SUCCESS = "Auth success for user ({})";
-            String REGISTRATION_SUCCESS = "Registration success for user ({})";
         }
         interface Users {
-            String REGISTERED = "User's registration successful! User ID: ({})";
-            String CREATED = "ID: {} created!";
-            String UPDATED = "User's update successful! User ID: ({})";
+            String REGISTERED = "User's registration successful! Created user ID: ({})";
+            String UPDATED = "User ({}) updated successfully!";
         }
         interface Token {
-            String TOKEN_GENERATED = "Token generation successful!";
-            String TOKEN_INFO = "Token information: userId({}) - expiration({})";
+            String TOKEN_GENERATED = "Token for user ({}) generated successfully! Expiration: ({})";
             String TOKEN_RENEW = "Token renew successful!";
         }
         interface Projects {
@@ -40,17 +44,18 @@ public final class Const {
         }
     }
     public interface Routes {
+        String CONTEXT = "/api";
         String ALL = "/**";
-        /*---- SECURED ROUTES ----*/
+        /*---- TOKEN SECURED ROUTES ----*/
         String RENEW = "/renew";
         String USERS = "/users";
+        String UPDATE = "/update";
         /*---- PUBLIC ROUTES ----*/
+        String STATUS = "/status";
         String AUTH = "/authentication";
+        String PROJECTS = "/projects";
         String LOGIN = "/login";
         String REGISTER = "/register";
-        String PUBLIC = "/public";
-        String HOME = "/home";
-        String PROJECTS = "/projects";
         String PROJECTS_INFO = "/{id}";
     }
     public interface Entities {
@@ -78,4 +83,5 @@ public final class Const {
         }
     }
     public static final ArrayList<String> ROLES = new ArrayList<>(List.of("user","editor","admin"));
+    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 }

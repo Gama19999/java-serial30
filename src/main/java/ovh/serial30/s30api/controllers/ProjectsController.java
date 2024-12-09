@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import ovh.serial30.s30api.exceptions.ProjectInfoNotFoundEx;
-import ovh.serial30.s30api.pojos.response.MSResponse;
+import ovh.serial30.s30api.pojos.dto.MSExchange;
 import ovh.serial30.s30api.services.ProjectsService;
 import ovh.serial30.s30api.utilities.Const;
 
 @RestController
-@RequestMapping(Const.Routes.PUBLIC + Const.Routes.PROJECTS)
+@RequestMapping(Const.Routes.PROJECTS)
 public class ProjectsController {
     private static final Logger logger = LoggerFactory.getLogger(ProjectsController.class);
 
@@ -28,7 +28,7 @@ public class ProjectsController {
     public ResponseEntity<?> getAllProjects() throws ProjectInfoNotFoundEx {
         var allProjects = projectsService.getAllProjects();
         logger.info(Const.Logs.Projects.PROJECTS_LIST, allProjects.size());
-        var response = new MSResponse(allProjects);
+        var response = new MSExchange(allProjects);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
@@ -38,7 +38,7 @@ public class ProjectsController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getProjectInfo(@PathVariable(Const.Entities.Attributes.ID) String projectId) {
         logger.info(Const.Logs.Projects.PROJECT_INFO, projectId);
-        var response = new MSResponse();
+        var response = new MSExchange();
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 }

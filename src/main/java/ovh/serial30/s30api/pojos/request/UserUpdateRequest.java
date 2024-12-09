@@ -10,13 +10,13 @@ import ovh.serial30.s30api.utilities.Util;
  */
 @Getter @Setter
 public class UserUpdateRequest {
-    private String currentPassword;
+    private String password;
     private int updateField;
     private String newValue;
 
     /**
      * Creates user update data representation
-     * @param currentPassword User's current password
+     * @param password User's current password
      * @param updateField User's data field to update indicated as a number.<br>Corresponding field number to
      *                    update its value:
      *                    <ol>
@@ -28,12 +28,12 @@ public class UserUpdateRequest {
      * @param newValue New value to save to specified field
      * @throws ArgumentInvalidEx If some argument value is invalid
      */
-    public UserUpdateRequest(String currentPassword, int updateField, String newValue) throws ArgumentInvalidEx {
-        if (Util.invalidStr(currentPassword)) throw new ArgumentInvalidEx("currentPassword", UserUpdateRequest.class.getName(), "constructor");
+    public UserUpdateRequest(String password, int updateField, String newValue) throws ArgumentInvalidEx {
+        if (Util.invalidStr(password)) throw new ArgumentInvalidEx("password", UserUpdateRequest.class.getName(), "constructor");
         if (updateField < 1 || updateField > 4) throw new ArgumentInvalidEx("updateField", UserUpdateRequest.class.getName(), "constructor");
         if (Util.invalidStr(newValue)) throw new ArgumentInvalidEx("newValue", UserUpdateRequest.class.getName(), "constructor");
         if (updateField == 3 && Util.invalidRole(newValue)) throw new ArgumentInvalidEx("newValue", UserUpdateRequest.class.getName(), "constructor");
-        this.currentPassword = currentPassword;
+        this.password = password;
         this.updateField = updateField;
         this.newValue = newValue;
     }

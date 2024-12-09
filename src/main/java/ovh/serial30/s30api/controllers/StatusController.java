@@ -8,13 +8,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import ovh.serial30.s30api.pojos.dto.MSExchange;
 import ovh.serial30.s30api.utilities.Const;
-import ovh.serial30.s30api.pojos.response.MSResponse;
 
 @RestController
-@RequestMapping(Const.Routes.PUBLIC + Const.Routes.HOME)
-public class HomeController {
-    private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
+@RequestMapping(Const.Routes.STATUS)
+public class StatusController {
+    private static final Logger logger = LoggerFactory.getLogger(StatusController.class);
 
     @Value("${app.name}")
     private String appName;
@@ -27,7 +27,7 @@ public class HomeController {
     public ResponseEntity<?> status() {
         logger.info(Const.Logs.active, appName, appVersion);
         var data = Const.Logs.active.replaceFirst(Const.Logs.$, appName.toUpperCase()).replaceFirst(Const.Logs.$, appVersion);
-        var response = new MSResponse(data);
+        var response = new MSExchange(data);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 }

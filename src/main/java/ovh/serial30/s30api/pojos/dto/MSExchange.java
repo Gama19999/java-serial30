@@ -1,4 +1,4 @@
-package ovh.serial30.s30api.pojos.response;
+package ovh.serial30.s30api.pojos.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -6,10 +6,10 @@ import lombok.Setter;
 import java.util.Date;
 
 /**
- * API outgoing data representation
+ * API exchange data representation
  */
 @Getter @Setter
-public class MSResponse {
+public class MSExchange {
     private int status;
     private Object data;
     private Date timestamp;
@@ -22,7 +22,7 @@ public class MSResponse {
      *     <li>timestamp: {@code new Date()}</li>
      * </ul>
      */
-    public MSResponse() {
+    public MSExchange() {
         this.status = 200;
         this.data = null;
         this.timestamp = new Date();
@@ -36,7 +36,7 @@ public class MSResponse {
      * </ul>
      * @param data API payload
      */
-    public MSResponse(Object data) {
+    public MSExchange(Object data) {
         this.status = 200;
         this.data = data;
         this.timestamp = new Date();
@@ -48,7 +48,7 @@ public class MSResponse {
      * @param status HTTP status code
      * @param data API payload
      */
-    public MSResponse(int status, Object data) {
+    public MSExchange(int status, Object data) {
         this.status = status;
         this.data = data;
         this.timestamp = new Date();

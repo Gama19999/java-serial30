@@ -7,8 +7,19 @@ import java.util.UUID;
 /**
  * Stores commonly used methods
  */
-public class Util {
+public final class Util {
     private Util() {}
+    /**
+     * Checks if passed route is public route
+     * @param route Requested route
+     * @return {@code true} if route is public - {@code false} otherwise
+     */
+    public static boolean isPublicRoute(String route) {
+        var firstPath = route.split(Const.Routes.CONTEXT)[1];
+        return firstPath.startsWith(Const.Routes.STATUS) ||
+               firstPath.startsWith(Const.Routes.PROJECTS) ||
+               firstPath.startsWith(Const.Routes.AUTH);
+    }
 
     /**
      * Validates a String

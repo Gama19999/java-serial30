@@ -10,15 +10,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ovh.serial30.s30api.exceptions.TokenInvalidEx;
+import ovh.serial30.s30api.exceptions.TokenNotRenewableEx;
 import ovh.serial30.s30api.exceptions.UserNotFoundEx;
+import ovh.serial30.s30api.repositories.UsersRepository;
 import ovh.serial30.s30api.utilities.Const;
 import ovh.serial30.s30api.utilities.Util;
 
-import javax.crypto.SecretKey;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.UUID;
 import java.util.function.Function;
+import java.util.UUID;
+import javax.crypto.SecretKey;
 
 @Service
 public class JWTServiceImpl implements JWTService {
@@ -32,14 +34,13 @@ public class JWTServiceImpl implements JWTService {
     private String appName;
     
     @Autowired
-    private UtilityService utilityService;
+    private UsersRepository usersRepository;
 
     @Override
     public String generateToken(UUID userId) throws UserNotFoundEx {
-        if (!utilityService.userExists(userId)) throw new UserNotFoundEx(Util.tostr(userId));
+        usersRepository.findById(userId).orElseThrow(() -> new UserNotFoundEx(Util.tostr(userId)));
         var token = buildToken(userId);
-        logger.info(Const.Logs.Token.TOKEN_GENERATED);
-        logger.info(Const.Logs.Token.TOKEN_INFO, Util.tostr(userId), new Date(System.currentTimeMillis() + expirationTime));
+        logger.info(Const.Logs.Token.TOKEN_GENERATED, Util.tostr(userId), new Date(System.currentTimeMillis() + expirationTime));
         return token;
     }
 
@@ -77,38 +78,26 @@ public class JWTServiceImpl implements JWTService {
     }
 
     @Override
-    public boolean validateToken(String token) throws TokenInvalidEx, UserNotFoundEx {
-        if (!utilityService.userExists(Util.touuid(getClaim(token, Claims::getSubject).toString())))
-            throw new UserNotFoundEx(getClaim(token, Claims::getSubject).toString());
-        return String.valueOf(getClaim(token, Claims::getIssuer)).equals(appName) && nonExpired(token);
-    }
-
-    /**
-     * Checks whether token is expired
-     * @param token User token
-     * @return {@code true} if token is expired. {@code false} otherwise
-     * @throws TokenInvalidEx If token is invalid
-     */
-    private boolean nonExpired(String token) throws TokenInvalidEx {
-        return !Util.beforeThan(getClaim(token, Claims::getExpiration), new Date());
-    }
-
-    @Override
-    public String renewToken(String token) throws UserNotFoundEx, TokenInvalidEx {
-        if (olderThanOneMonth(token)) throw new TokenInvalidEx();
+    public String renewToken(String token) throws UserNotFoundEx, TokenInvalidEx, TokenNotRenewableEx {
+        if (olderThan7Days(token)) throw new TokenNotRenewableEx();
         var userId = Util.touuid(getClaim(token, Claims::getSubject).toString());
         return generateToken(userId);
     }
 
     /**
-     * Verifies token renewal is not older than one month
+     * Verifies that token renewal for an expired token is not older than 7 days
      * @param token Expired user's token
-     * @return {@code true} if token is 1+ month older - {@code false} otherwise
+     * @return {@code true} if token is 7+ days older - {@code false} otherwise
      * @throws TokenInvalidEx If token is invalid
      */
-    private boolean olderThanOneMonth(String token) throws TokenInvalidEx {
+    private boolean olderThan7Days(String token) throws TokenInvalidEx {
         var curCal = Calendar.getInstance();
-        curCal.roll(Calendar.MONTH, -1);
+        curCal.add(Calendar.DAY_OF_MONTH, -7);
         return Util.beforeThan(getClaim(token, Claims::getExpiration), curCal.getTime());
+    }
+
+    @Override
+    public UUID getUserID(String token) throws TokenInvalidEx {
+        return Util.touuid(getClaim(token, Claims::getSubject).toString());
     }
 }

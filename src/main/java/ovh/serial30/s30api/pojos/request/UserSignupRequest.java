@@ -25,6 +25,7 @@ public class UserSignupRequest {
      */
     public UserSignupRequest(String username, String password, String role, String projectId) throws ArgumentInvalidEx {
         if (Util.invalidStr(username)) throw new ArgumentInvalidEx("username", UserSignupRequest.class.getName(), "constructor");
+        if (username.length() > 15) throw new ArgumentInvalidEx("username", UserSignupRequest.class.getName(), "constructor");
         if (Util.invalidStr(password)) throw new ArgumentInvalidEx("password", UserSignupRequest.class.getName(), "constructor");
         if (Util.invalidRole(role)) throw new ArgumentInvalidEx("role", UserSignupRequest.class.getName(), "constructor");
         if (Util.invalidStr(projectId)) throw new ArgumentInvalidEx("projectId", UserSignupRequest.class.getName(), "constructor");

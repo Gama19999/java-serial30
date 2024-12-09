@@ -10,7 +10,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ovh.serial30.s30api.pojos.response.MSResponse;
+import ovh.serial30.s30api.pojos.dto.MSExchange;
 import ovh.serial30.s30api.utilities.Const;
 
 @RestControllerAdvice
@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(GeneralAppException.class)
     public ResponseEntity<?> generalAppExceptions(GeneralAppException ex) {
         displayDetails(ex, ex.code, ex.getMessage());
-        var response = new MSResponse(ex.code, ex.getMessage());
+        var response = new MSExchange(ex.code, ex.getMessage());
         return ResponseEntity.status(ex.code).body(response);
     }
 
@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<?> badCredentialsExceptions(BadCredentialsException ex) {
         displayDetails(ex, HttpStatus.UNAUTHORIZED.value(), Const.Logs.Exceptions.USER401);
-        var response = new MSResponse(HttpStatus.UNAUTHORIZED.value(), Const.Logs.Exceptions.USER401);
+        var response = new MSExchange(HttpStatus.UNAUTHORIZED.value(), Const.Logs.Exceptions.USER401);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
     private ResponseEntity<?> missingHeaderExceptions(MissingRequestHeaderException ex) {
         var msg = Const.Logs.Exceptions.HEADER422.replaceFirst(Const.Logs.$, ex.getHeaderName());
         displayDetails(ex, HttpStatus.UNPROCESSABLE_ENTITY.value(), msg);
-        var response = new MSResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), msg);
+        var response = new MSExchange(HttpStatus.UNPROCESSABLE_ENTITY.value(), msg);
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
     }
 
@@ -59,14 +59,15 @@ public class GlobalExceptionHandler {
      * <ul>
      *     <li>The jwt argument does not represent a signed Claims JWT</li>
      *     <li>The jwt string cannot be parsed or validated as required</li>
+     *     <li>The jwt string is malformed</li>
      * </ul>
      * @param ex Exception thrown
      * @return MSResponse
      */
-    @ExceptionHandler({UnsupportedJwtException.class, JwtException.class})
+    @ExceptionHandler({UnsupportedJwtException.class, JwtException.class, IllegalArgumentException.class})
     private ResponseEntity<?> jwtParsingExceptions(Exception ex) {
         displayDetails(ex, HttpStatus.FORBIDDEN.value(), Const.Logs.Exceptions.TOKEN403);
-        var response = new MSResponse(HttpStatus.FORBIDDEN.value(), Const.Logs.Exceptions.TOKEN403);
+        var response = new MSExchange(HttpStatus.FORBIDDEN.value(), Const.Logs.Exceptions.TOKEN403);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
