@@ -18,7 +18,8 @@ public final class Util {
         var firstPath = route.split(Const.Routes.CONTEXT)[1];
         return firstPath.startsWith(Const.Routes.STATUS) ||
                firstPath.startsWith(Const.Routes.PROJECTS) ||
-               firstPath.startsWith(Const.Routes.AUTH);
+               firstPath.startsWith(Const.Routes.AUTH) ||
+               firstPath.equals(Const.Routes.USERS + Const.Routes.REGISTER);
     }
 
     /**
