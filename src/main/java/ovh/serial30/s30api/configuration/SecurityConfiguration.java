@@ -42,7 +42,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         var config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of(Const.Http.DEV, Const.Http.LOCAL, Const.Http.PROD));
+        config.setAllowedOriginPatterns(List.of(Const.Http.DEV, Const.Http.LOCAL, Const.Http.NET, Const.Http.MOB));
         config.setAllowedMethods(List.of(HttpMethod.GET.name(), HttpMethod.POST.name()));
         config.setAllowedHeaders(List.of("*"));
         var source = new UrlBasedCorsConfigurationSource();

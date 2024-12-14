@@ -9,7 +9,8 @@ public final class Const {
     public interface Http {
         String DEV = "http://localhost:4200";
         String LOCAL = "http://127.0.0.1:[*]";
-        String PROD = "https://*.serial30.ovh";
+        String NET = "https://*.serial30.ovh";
+        String MOB = "https://localhost";
     }
     public interface Logs {
         String $ = "\\{\\}";
