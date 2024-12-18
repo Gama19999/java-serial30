@@ -37,7 +37,8 @@ public final class Const {
         }
         interface Token {
             String TOKEN_GENERATED = "Token for user ({}) generated successfully! Expiration: ({})";
-            String TOKEN_RENEW = "Token renew successful!";
+            String TOKEN_RENEW = "Renewing token expired! User's ID ({})";
+            String TOKEN_RENEWED = "Token renew successful!";
         }
         interface Projects {
             String PROJECTS_LIST = "Successfully retrieved ({}) project previews!";

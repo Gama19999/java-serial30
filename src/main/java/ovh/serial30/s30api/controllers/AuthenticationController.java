@@ -53,7 +53,7 @@ public class AuthenticationController {
         var userToken = jwtService.renewToken(token);
         var expiration = Const.DATE_FORMAT.format(new Date(System.currentTimeMillis() + expirationTime));
         var response = new MSExchange(new LoginResponse(userToken, expiration));
-        logger.info(Const.Logs.Token.TOKEN_RENEW);
+        logger.info(Const.Logs.Token.TOKEN_RENEWED);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 }

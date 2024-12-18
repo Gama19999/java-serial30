@@ -1,6 +1,7 @@
 package ovh.serial30.s30api.services;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -79,21 +80,39 @@ public class JWTServiceImpl implements JWTService {
 
     @Override
     public String renewToken(String token) throws UserNotFoundEx, TokenInvalidEx, TokenNotRenewableEx {
-        if (olderThan7Days(token)) throw new TokenNotRenewableEx();
-        var userId = Util.touuid(getClaim(token, Claims::getSubject).toString());
+        var userId = handleGetExpiredTokenUserID(token);
         return generateToken(userId);
     }
 
     /**
-     * Verifies that token renewal for an expired token is not older than 7 days
-     * @param token Expired user's token
-     * @return {@code true} if token is 7+ days older - {@code false} otherwise
-     * @throws TokenInvalidEx If token is invalid
+     * Handles user's ID extract from expired token to perform token renew successfully
+     * @param token User's expired token
+     * @return User's ID
+     * @throws TokenInvalidEx If token is an invalid string
+     * @throws TokenNotRenewableEx If token is 7+ days expired
      */
-    private boolean olderThan7Days(String token) throws TokenInvalidEx {
+    private UUID handleGetExpiredTokenUserID(String token) throws TokenInvalidEx, TokenNotRenewableEx {
+        UUID userId;
+        try {
+            userId = Util.touuid(getClaim(token, Claims::getSubject).toString());
+        } catch (ExpiredJwtException ex) {
+            logger.info(Const.Logs.Token.TOKEN_RENEW, ex.getClaims().getSubject());
+            var expiration = ex.getClaims().getExpiration();
+            if (olderThan7Days(expiration)) throw new TokenNotRenewableEx();
+            userId = Util.touuid(ex.getClaims().getSubject());
+        }
+        return userId;
+    }
+
+    /**
+     * Verifies that token renewal for an expired token is not older than 7 days
+     * @param tokenExp User's token expiration date
+     * @return {@code true} if token is 7+ days expired - {@code false} otherwise
+     */
+    private boolean olderThan7Days(Date tokenExp) {
         var curCal = Calendar.getInstance();
         curCal.add(Calendar.DAY_OF_MONTH, -7);
-        return Util.beforeThan(getClaim(token, Claims::getExpiration), curCal.getTime());
+        return Util.beforeThan(tokenExp, curCal.getTime());
     }
 
     @Override
